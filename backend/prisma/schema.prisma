@@ -1,0 +1,48 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Організація (Tenant/Company)
+model Organization {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+
+  // Зв'язок 1:N (в одній організації багато проєктів)
+  projects    Project[]
+}
+
+// 2. Проєкт
+model Project {
+  id             Int          @id @default(autoincrement())
+  name           String
+  description    String?
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  // Зв'язок 1:N (у проєкті багато завдань/асетів)
+  tasks          Task[]
+}
+
+// 3. Завдання/Асет (з полем під файл/посилання)
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("TODO")
+  
+  // Вимога C1: поле типу файл (посилання на завантажений файл)
+  fileUrl     String?  
+
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

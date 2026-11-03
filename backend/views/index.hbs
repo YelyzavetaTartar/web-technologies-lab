@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Technologies Lab — MVC Панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 text-primary">Web-technologies lab — Панель керування (MVC)</h1>
+            <span class="badge bg-success fs-6">Лабораторна C1 виконана</span>
+        </div>
+
+        <!-- Форми для додавання -->
+        <div class="row g-4 mb-5">
+            <!-- 1. Створення Організації -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white font-weight-bold">1. Нова Організація</div>
+                    <div class="card-body">
+                        <form action="/organizations" method="POST">
+                            <div class="mb-2">
+                                <input type="text" name="name" class="form-control" placeholder="Назва компанії" required>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="description" class="form-control" placeholder="Опис">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-sm">Створити</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Створення Проєкту -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-info text-white font-weight-bold">2. Новий Проєкт</div>
+                    <div class="card-body">
+                        <form action="/projects" method="POST">
+                            <div class="mb-2">
+                                <select name="organizationId" class="form-select" required>
+                                    <option value="" disabled selected>Оберіть організацію...</option>
+                                    {{#each organizations}}
+                                    <option value="{{this.id}}">{{this.name}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="name" class="form-control" placeholder="Назва проєкту" required>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="description" class="form-control" placeholder="Опис">
+                            </div>
+                            <button type="submit" class="btn btn-info text-white w-100 btn-sm">Створити</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Створення Завдання з Файлом -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white font-weight-bold">3. Нове Завдання (з файлом)</div>
+                    <div class="card-body">
+                        <form action="/tasks" method="POST" enctype="multipart/form-data">
+                            <div class="mb-2">
+                                <select name="projectId" class="form-select" required>
+                                    <option value="" disabled selected>Оберіть проєкт...</option>
+                                    {{#each organizations}}
+                                    <optgroup label="{{this.name}}">
+                                        {{#each this.projects}}
+                                        <option value="{{this.id}}">{{this.name}}</option>
+                                        {{/each}}
+                                    </optgroup>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="title" class="form-control" placeholder="Заголовок завдання" required>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="description" class="form-control" placeholder="Опис">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Прикріпити файл:</label>
+                                <input type="file" name="file" class="form-control form-control-sm">
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 btn-sm">Додати завдання</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Відображення списку сутностей (Read, Update, Delete) -->
+        <h3 class="mb-3">Структура даних (Організації → Проєкти → Завдання)</h3>
+
+        {{#each organizations}}
+        <div class="card mb-4 shadow-sm border-primary">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 text-primary d-inline">{{this.name}}</h5>
+                    <small class="text-muted ms-2">({{this.description}})</small>
+                </div>
+                <form action="/organizations/{{this.id}}/delete" method="POST" class="d-inline" onsubmit="return confirm('Видалити організацію з усіма проєктами?')">
+                    <button class="btn btn-outline-danger btn-sm">Видалити організацію</button>
+                </form>
+            </div>
+            <div class="card-body">
+                {{#if this.projects.length}}
+                <div class="row g-3">
+                    {{#each this.projects}}
+                    <div class="col-md-6">
+                        <div class="card h-100 border-secondary">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                                <span class="fw-bold">{{this.name}}</span>
+                                <form action="/projects/{{this.id}}/delete" method="POST" class="d-inline">
+                                    <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none">Видалити проєкт</button>
+                                </form>
+                            </div>
+                            <div class="card-body py-2">
+                                <p class="small text-muted mb-2">{{this.description}}</p>
+
+                                <h6>Завдання:</h6>
+                                {{#if this.tasks.length}}
+                                <ul class="list-group list-group-flush small">
+                                    {{#each this.tasks}}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div>
+                                            <strong>{{this.title}}</strong>
+                                            {{#if this.description}}<div class="text-muted">{{this.description}}</div>{{/if}}
+
+                                            {{#if this.fileUrl}}
+                                            <div class="mt-1">
+                                                <a href="{{this.fileUrl}}" target="_blank" class="badge bg-secondary text-decoration-none">📎 Відкрити файл</a>
+                                            </div>
+                                            {{/if}}
+                                        </div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <form action="/tasks/{{this.id}}/status" method="POST" class="d-inline d-flex gap-1">
+                                                <select name="status" class="form-select form-select-sm">
+                                                    <option value="TODO" {{#if (eq this.status 'TODO')}} selected{{/if}}>TODO</option>
+                                                    <option value="IN_PROGRESS" {{#if (eq this.status 'IN_PROGRESS')}} selected{{/if}}>IN PROGRESS</option>
+                                                    <option value="DONE" {{#if (eq this.status 'DONE')}} selected{{/if}}>DONE</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-outline-primary py-0 px-2" title="Зберегти статус">✓</button>
+                                            </form>
+                                            <form action="/tasks/{{this.id}}/delete" method="POST" class="d-inline">
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-1">✕</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                    {{/each}}
+                                </ul>
+                                {{else}}
+                                <p class="text-muted small mb-0">Немає завдань</p>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                {{else}}
+                <p class="text-muted mb-0">У цій організації ще немає проєктів.</p>
+                {{/if}}
+            </div>
+        </div>
+        {{else}}
+        <div class="alert alert-info">База порожня. Створіть свою першу організацію вище!</div>
+        {{/each}}
+    </div>
+</body>
+</html>
