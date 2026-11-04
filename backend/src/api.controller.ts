@@ -9,6 +9,8 @@ import {
     HttpStatus,
     HttpCode,
     BadRequestException,
+    Query,
+    Req,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 
@@ -96,8 +98,18 @@ export class ApiController {
     // 3. TASKS API (/api/tasks)
 
     @Get('tasks')
-    async getAllTasks() {
-        return this.appService.getTasks();
+    async getAllTasks(
+        @Query('skip') skip ?: string,
+        @Query('limit') limit ?: string,
+        @Req() req ?: any,
+    ) {
+        const skipNum = skip ? parseInt(skip, 10) : 0;
+        const limitNum = limit ? parseInt(limit, 10) : 10;
+        const protocol = req?.protocol || 'http';
+        const host = req?.get ? req.get('host') : 'localhost:3000';
+        const baseUrl = `${protocol}://${host}/api/tasks`;
+
+        return this.appService.getTasksPaginated(skipNum, limitNum, baseUrl);
     }
 
     @Get('tasks/:id')

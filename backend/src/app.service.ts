@@ -93,10 +93,28 @@ export class AppService {
     }
 
     // REST API: TASKS
-    async getTasks() {
-        return this.prisma.task.findMany({
-            orderBy: { id: 'asc' },
-        });
+
+    //B1 - Отримання завдань із пагінацією (skip, limit, nextLink)  
+    async getTasksPaginated(skip = 0, limit = 10, baseUrl = '/api/tasks') {
+        const [tasks, total] = await Promise.all([
+            this.prisma.task.findMany({
+                skip,
+                take: limit,
+                orderBy: { id: 'asc' },
+            }),
+            this.prisma.task.count(),
+        ]);
+
+        const hasNext = skip + limit < total;
+        const nextLink = hasNext ? `${baseUrl}?skip=${skip + limit}&limit=${limit}` : null;
+
+        return {
+            total,
+            skip,
+            limit,
+            nextLink,
+            data: tasks,
+        };
     }
 
     async getTaskById(id: number) {
