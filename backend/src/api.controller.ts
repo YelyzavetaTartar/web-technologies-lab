@@ -11,8 +11,10 @@ import {
     BadRequestException,
     Query,
     Req,
+    UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('api')
 export class ApiController {
@@ -21,10 +23,14 @@ export class ApiController {
     // 1. ORGANIZATIONS API (/api/organizations)
 
     @Get('organizations')
+    @UseInterceptors(CacheInterceptor)
+    @CacheKey('all_organizations')
+    @CacheTTL(30000)
     async getAllOrganizations() {
+        console.log('--- [Запит до БД] Отримання організацій ---');
         return this.appService.getOrganizations();
     }
-
+       
     @Get('organizations/:id')
     async getOrganization(@Param('id') id: string) {
         return this.appService.getOrganizationById(Number(id));
