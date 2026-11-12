@@ -1,5 +1,8 @@
-# Базовий образ Node.js
+# Базовий образ Node.js на базі Alpine
 FROM node:20-alpine
+
+# Встановлюємо OpenSSL та системні бібліотеки для Prisma
+RUN apk add --no-cache openssl libc6-compat
 
 # Робоча папка всередині контейнера
 WORKDIR /app
@@ -21,5 +24,5 @@ RUN npm run build
 # Відкриваємо порт 3000
 EXPOSE 3000
 
-# Запуск скомпільованого бекенду
-CMD ["npm", "run", "start:prod"]
+# Автоматично накатуємо міграції та запускаємо сервер
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
