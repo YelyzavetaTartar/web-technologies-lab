@@ -115,4 +115,20 @@ export class AuthService {
             },
         };
     }
+
+    // Зміна тарифного плану (Feature Flag: перемикання Premium) - Вимога B6
+    async togglePremium(userId: number) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user) throw new NotFoundException('Користувача не знайдено');
+
+        const updatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: { isPremium: !user.isPremium }, // Перемикаємо false <-> true
+        });
+
+        return {
+            message: `Тарифний план успішно змінено на: ${updatedUser.isPremium ? 'PREMIUM' : 'FREE'}`,
+            isPremium: updatedUser.isPremium,
+        };
+    }
 }

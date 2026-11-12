@@ -13,14 +13,19 @@ import {
     Req,
     UseInterceptors,
     UseGuards,
+    ForbiddenException,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { AuthGuard } from '@nestjs/passport';
+import { PrismaService } from './prisma.service';
 
 @Controller('api')
 export class ApiController {
-    constructor(private readonly appService: AppService) { }
+    constructor(
+        private readonly appService: AppService,
+        private readonly prisma: PrismaService,
+    ) { }
 
     // 1. ORGANIZATIONS API (/api/organizations)
 
@@ -158,7 +163,6 @@ export class ApiController {
     
     // 4. ТЕНАНТНІ ЕНДПОІНТИ (Вимога B5)
    
-
     // Отримати проєкти тільки свого тенанта за JWT токеном
     @Get('tenant/projects')
     @UseGuards(AuthGuard('jwt'))
@@ -180,5 +184,56 @@ export class ApiController {
         }
         const tenantId = req.user.organizationId;
         return this.appService.createTenantProject(body.name, body.description || '', tenantId);
+    }
+
+    // 5. FEATURE FLAGS (Вимога B6)
+   
+    // Особлива сторінка, доступна ЛИШЕ користувачам з прапорцем Premium
+    @Get('premium/analytics')
+    @UseGuards(AuthGuard('jwt'))
+    async getPremiumFeature(@Req() req: any) {
+        // Шукаємо свіжий статус прапорця в базі даних
+        const user = await this.prisma.user.findUnique({ where: { id: req.user.id } });
+
+        if (!user || !user.isPremium) {
+            throw new ForbiddenException(
+                '403 Forbidden: Ця функція доступна лише для тарифу Premium (Feature Flag: isPremium = false)',
+            );
+        }
+
+        return {
+            status: 'success',
+            feature: 'Advanced AI Analytics & Enterprise Dashboard',
+            data: {
+                workspaceEfficiency: '98.5%',
+                predictedDeadlines: 'All tasks on track',
+                activeTenantId: req.user.organizationId,
+                tier: 'PREMIUM_PLAN',
+            },
+        };
+    }
+
+    // Перемикання тарифного плану (Feature Flag: Free <-> Premium)
+    @Post('auth/toggle-premium')
+    @UseGuards(AuthGuard('jwt'))
+    async togglePremiumPlan(@Req() req: any) {
+        const user = await this.prisma.user.findUnique({ where: { id: req.user.id } });
+        if (!user) {
+            throw new BadRequestException('Користувача не знайдено');
+        }
+
+        const updated = await this.prisma.user.update({
+            where: { id: req.user.id },
+            data: { isPremium: !user.isPremium },
+        });
+
+        return {
+            message: `Feature flag змінено! Поточний статус Premium: ${updated.isPremium}`,
+            user: {
+                id: updated.id,
+                email: updated.email,
+                isPremium: updated.isPremium,
+            },
+        };
     }
 }
