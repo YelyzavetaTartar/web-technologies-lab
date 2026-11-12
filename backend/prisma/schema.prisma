@@ -14,11 +14,27 @@ model Organization {
   description String?
   createdAt   DateTime  @default(now())
 
-  // Зв'язок 1:N (в одній організації багато проєктів)
-  projects    Project[]
+  // Зв'язок 1:N 
+  users       User[]
+  projects    Project[] // в одній організації багато проєктів
 }
 
-// 2. Проєкт
+// 2. Користувачі (Автентифікація C16, Тенанти B5, Фічі B6)
+model User {
+  id             Int          @id @default(autoincrement())
+  email          String       @unique
+  password       String
+  name           String?
+  role           String       @default("USER") // USER або ADMIN
+  isPremium      Boolean      @default(false)  // Вимога B6 (Feature Flag для Premium доступу)
+  
+  organizationId Int          // Вимога B5 (Ізоляція за тенантом)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime     @default(now())
+}
+
+// 3. Проєкт
 model Project {
   id             Int          @id @default(autoincrement())
   name           String
@@ -31,7 +47,7 @@ model Project {
   tasks          Task[]
 }
 
-// 3. Завдання/Асет (з полем під файл/посилання)
+// 4. Завдання/Асет (з полем під файл/посилання)
 model Task {
   id          Int      @id @default(autoincrement())
   title       String
