@@ -150,4 +150,28 @@ export class AppService {
         await this.getTaskById(id);
         return this.prisma.task.delete({ where: { id } });
     }
+
+    // ТЕНАНТИ (B5): Ізольовані методи за organizationId
+   
+    // Отримати проєкти ТІЛЬКИ своєї організації (Тенанта)
+    async getTenantProjects(organizationId: number) {
+        return this.prisma.project.findMany({
+            where: { organizationId }, // Сувора ізоляція!
+            include: { tasks: true },
+            orderBy: { id: 'asc' },
+        });
+    }
+
+    // Створити проєкт ТІЛЬКИ всередині свого Тенанта
+    async createTenantProject(name: string, description: string, organizationId: number) {
+        return this.prisma.project.create({
+            data: {
+                name,
+                description,
+                organizationId, // Автоматично прив'язуємо до поточної компанії
+            },
+        });
+    }
+
+
 }

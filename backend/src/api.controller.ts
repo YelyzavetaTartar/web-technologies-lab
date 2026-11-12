@@ -12,9 +12,11 @@ import {
     Query,
     Req,
     UseInterceptors,
+    UseGuards,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('api')
 export class ApiController {
@@ -152,5 +154,31 @@ export class ApiController {
     @HttpCode(HttpStatus.OK)
     async deleteTask(@Param('id') id: string) {
         return this.appService.deleteTask(Number(id));
+    }
+    
+    // 4. ТЕНАНТНІ ЕНДПОІНТИ (Вимога B5)
+   
+
+    // Отримати проєкти тільки свого тенанта за JWT токеном
+    @Get('tenant/projects')
+    @UseGuards(AuthGuard('jwt'))
+    async getMyTenantProjects(@Req() req: any) {
+        const tenantId = req.user.organizationId;
+        return this.appService.getTenantProjects(tenantId);
+    }
+
+    // Створити проєкт у своєму тенанті
+    @Post('tenant/projects')
+    @UseGuards(AuthGuard('jwt'))
+    @HttpCode(HttpStatus.CREATED)
+    async createMyTenantProject(
+        @Req() req: any,
+        @Body() body: { name: string; description?: string },
+    ) {
+        if (!body.name) {
+            throw new BadRequestException("Поле 'name' обов'язкове");
+        }
+        const tenantId = req.user.organizationId;
+        return this.appService.createTenantProject(body.name, body.description || '', tenantId);
     }
 }
