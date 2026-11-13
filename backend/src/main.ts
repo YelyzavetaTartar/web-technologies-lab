@@ -21,7 +21,8 @@ async function bootstrap() {
     // Хелпер для порівняння значень у шаблонах
     hbs.registerHelper('eq', (a: any, b: any) => a === b);
 
-    await app.listen(3000);
-    console.log(`\n🚀 Додаток запущено: http://localhost:3000\n`);
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+    console.log(`\n🚀 Додаток запущено на порту: ${port}\n`);
 }
 bootstrap();
