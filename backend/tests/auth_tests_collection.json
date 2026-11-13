@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "Auth & Feature Flags Tests (QA3)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "qa_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Реєстрація нового користувача (201 Created)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Token exists and saved to collection variables', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('access_token');",
+              "    pm.collectionVariables.set('qa_token', jsonData.access_token);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"qa_user_{{$timestamp}}@knu.ua\",\n  \"password\": \"secret123\",\n  \"organizationId\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "auth", "register" ]
+        }
+      }
+    },
+    {
+      "name": "2. Вхід з невірним паролем (401 Unauthorized)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"student@knu.ua\",\n  \"password\": \"WRONG_PASSWORD_123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "auth", "login" ]
+        }
+      }
+    },
+    {
+      "name": "3. Доступ до захищеного роуту БЕЗ токена (401 Unauthorized)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/auth/me",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "auth", "me" ]
+        }
+      }
+    },
+    {
+      "name": "4. Доступ до Premium роуту БЕЗ преміум-плану (403 Forbidden)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 403 Forbidden', function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{qa_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/premium/analytics",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "premium", "analytics" ]
+        }
+      }
+    }
+  ]
+}
