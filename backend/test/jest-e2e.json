@@ -1,9 +1,187 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+  "info": {
+    "name": "Web Technologies Lab — API Tests (QA1)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET All Organizations (Status 200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is an array', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/organizations",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "organizations" ]
+        }
+      }
+    },
+    {
+      "name": "2. GET Non-Existing Organization (Status 404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404 Not Found', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/organizations/99999",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "organizations", "99999" ]
+        }
+      }
+    },
+    {
+      "name": "3. POST Create Organization - Invalid Body (Status 400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"description\": \"Без обов'язкового поля name\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/organizations",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "organizations" ]
+        }
+      }
+    },
+    {
+      "name": "4. POST Create Organization - Valid (Status 201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Returned object has id and name', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.name).to.eql('Тестова Компанія Postman');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Тестова Компанія Postman\",\n    \"description\": \"Створено через автотест\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/organizations",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "organizations" ]
+        }
+      }
+    },
+    {
+      "name": "5. GET Tasks with Pagination (Status 200 & B1 Check)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Pagination structure contains total, skip, limit, data', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total');",
+              "    pm.expect(jsonData).to.have.property('skip');",
+              "    pm.expect(jsonData).to.have.property('limit');",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/tasks?skip=0&limit=1",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "3000",
+          "path": [ "api", "tasks" ],
+          "query": [
+            {
+              "key": "skip",
+              "value": "0"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    }
+  ]
 }
