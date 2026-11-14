@@ -20,16 +20,16 @@
                     Користувач авторизується через Microsoft Azure AD, отримує access token та робить запит до <code>https://graph.microsoft.com/v1.0/me</code>.
                 </p>
 
-                <!-- Кнопки входу / виходу -->
-                <div class="d-flex gap-2 mb-4">
+                <!-- Кнопки демонстрації F4 -->
+                <div class="d-flex flex-wrap gap-2 mb-4">
                     <button id="loginBtn" class="btn btn-success">
-                        Увійти через Microsoft
+                        🔑 Виклик вікна MSAL.js Popup
                     </button>
-                    <button id="graphBtn" class="btn btn-info text-white" disabled>
-                        Запитати Microsoft Graph API
+                    <button id="graphBtn" class="btn btn-primary text-white">
+                        📊 Завантажити Microsoft Graph API (/v1.0/me)
                     </button>
                     <button id="logoutBtn" class="btn btn-outline-danger" style="display: none;">
-                        Вийти
+                        Очистити
                     </button>
                 </div>
 
