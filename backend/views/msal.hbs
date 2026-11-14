@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>MSAL.js & Microsoft Graph API (F4)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Офіційна бібліотека MSAL.js для браузера (Вимога F4) -->
+    <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+</head>
+<body class="bg-light py-5">
+    <div class="container" style="max-width: 800px;">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">🔑 Авторизація MSAL.js та Microsoft Graph (F4)</h4>
+                <a href="/" class="btn btn-outline-light btn-sm">← На головну</a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Ця сторінка демонструє роботу бібліотеки <strong>@azure/msal-browser</strong>.
+                    Користувач авторизується через Microsoft Azure AD, отримує access token та робить запит до <code>https://graph.microsoft.com/v1.0/me</code>.
+                </p>
+
+                <!-- Кнопки входу / виходу -->
+                <div class="d-flex gap-2 mb-4">
+                    <button id="loginBtn" class="btn btn-success">
+                        Увійти через Microsoft
+                    </button>
+                    <button id="graphBtn" class="btn btn-info text-white" disabled>
+                        Запитати Microsoft Graph API
+                    </button>
+                    <button id="logoutBtn" class="btn btn-outline-danger" style="display: none;">
+                        Вийти
+                    </button>
+                </div>
+
+                <div id="statusMessage" class="alert alert-secondary py-2">
+                    Статус: Очікування авторизації користувача...
+                </div>
+
+                <!-- Відображення отриманих даних -->
+                <div id="profileContainer" class="card mt-3 bg-white" style="display: none;">
+                    <div class="card-header bg-dark text-white font-monospace small">
+                        Microsoft Graph API: /v1.0/me
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-primary" id="userName"></h5>
+                        <p class="card-text mb-1"><strong>Email:</strong> <span id="userEmail"></span></p>
+                        <p class="card-text mb-1"><strong>User ID (AAD):</strong> <span id="userId"></span></p>
+                        <hr>
+                        <h6>Сирий JSON відповіді від Microsoft Graph:</h6>
+                        <pre class="bg-light p-3 border rounded small"><code id="rawResponse"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Підключення нашого зовнішнього скрипта -->
+    <script src="/public/msal.js"></script>
+</body>
+</html>

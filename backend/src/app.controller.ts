@@ -26,6 +26,13 @@ export class AppController {
         return { organizations };
     }
 
+    // Сторінка демонстрації MSAL.js та Microsoft Graph API (Вимога F4)
+    @Get('msal')
+    @Render('msal')
+    getMsalPage() {
+        return {};
+    }
+
     // Створення Організації
     @Post('organizations')
     @Redirect('/')

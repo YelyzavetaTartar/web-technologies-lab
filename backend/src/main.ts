@@ -14,6 +14,11 @@ async function bootstrap() {
         prefix: '/uploads/',
     });
 
+    // Налаштування роздачі статичних скриптів та стилів (Вимога чистого коду)
+    app.useStaticAssets(join(__dirname, '..', 'public'), {
+        prefix: '/public/',
+    });
+
     // Налаштування шаблонізатора Handlebars для MVC
     app.setBaseViewsDir(join(__dirname, '..', 'views'));
     app.setViewEngine('hbs');
